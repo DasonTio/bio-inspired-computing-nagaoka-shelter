@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nagaoka Shelter Data</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+	--bg: #f7f7f5; --panel: #ffffff; --ink: #1c1f23; --muted: #626a73; --line: #e2e4e7;
+	--accent: #2a6fdb; --ok: #2e8b57; --warn: #d98e04; --bad: #c8372d; --grey: #9aa1a9; --old: #e07b39;
+	--est: #8e44ad; --row: #fafbfc;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) {
+		--bg: #121417; --panel: #1b1e22; --ink: #e8eaed; --muted: #9aa3ad; --line: #2c3036;
+		--accent: #6aa0ff; --ok: #4cc38a; --warn: #f0b23e; --bad: #ff6b5e; --grey: #6c737b; --old: #ff9a5c;
+		--est: #c38df0; --row: #202429;
+	}
+}
+:root[data-theme="dark"] {
+	--bg: #121417; --panel: #1b1e22; --ink: #e8eaed; --muted: #9aa3ad; --line: #2c3036;
+	--accent: #6aa0ff; --ok: #4cc38a; --warn: #f0b23e; --bad: #ff6b5e; --grey: #6c737b; --old: #ff9a5c;
+	--est: #c38df0; --row: #202429;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif; }
+header { padding: 20px 16px 8px; max-width: 1280px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 4px; }
+.sub { color: var(--muted); margin: 0; }
+main { max-width: 1280px; margin: 0 auto; padding: 0 16px 40px; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 12px 0 16px; }
+.tabs button { background: none; border: 0; padding: 10px 14px; color: var(--muted); font: inherit; cursor: pointer; border-bottom: 2px solid transparent; }
+.tabs button.on { color: var(--ink); border-color: var(--accent); font-weight: 600; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.card b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+.card span { color: var(--muted); font-size: 12px; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 10px; }
+.controls label { color: var(--muted); font-size: 13px; }
+select, input[type=search] { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+#map { height: 640px; border-radius: 8px; border: 1px solid var(--line); }
+.legend { background: var(--panel); color: var(--ink); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--line); font-size: 12px; line-height: 1.6; }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.legend i.sq { border-radius: 2px; }
+.desc { color: var(--muted); margin: 0 0 8px; }
+.tablewrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; }
+th:hover { color: var(--accent); }
+tr:nth-child(even) td { background: var(--row); }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.pager { display: flex; gap: 8px; align-items: center; margin: 10px 0; color: var(--muted); }
+.pager button { font: inherit; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+details { margin: 8px 0 12px; }
+details summary { cursor: pointer; color: var(--accent); }
+.dict { font-size: 12.5px; }
+.dict td { white-space: normal; }
+.hidden { display: none; }
+h2 { font-size: 16px; margin: 22px 0 6px; }
+h3 { font-size: 14px; margin: 0 0 6px; }
+.note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--warn); border-radius: 6px; padding: 8px 12px; margin: 0 0 12px; }
+.twin { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cmap { height: 520px; border-radius: 8px; border: 1px solid var(--line); }
+.chart { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+.chart svg { width: 100%; height: auto; display: block; }
+.chart text { fill: var(--muted); font-size: 12px; }
+td.best { font-weight: 700; }
+@media (max-width: 800px) { .twin { grid-template-columns: 1fr; } .cmap { height: 380px; } }
+.leaflet-popup-content { font-size: 12.5px; }
+.leaflet-popup-content table { width: auto; }
+.leaflet-popup-content th { position: static; background: none; cursor: default; }
+.leaflet-popup-content th, .leaflet-popup-content td { padding: 2px 6px; }
+@media (max-width: 640px) { #map { height: 460px; } }
+</style>
+</head>
+<body>
+<header>
+	<h1>Nagaoka Earthquake Shelter Data</h1>
+	<p class="sub">Tugas 2 (GA and PSO). 2020 census cells, the current GSI shelter list, and the 2012 MLIT P20 list it is matched to.</p>
+</header>
+<main>
+	<div class="tabs">
+		<button class="on" data-tab="mapview">Map</button>
+		<button data-tab="cmpview">GA vs PSO</button>
+		<button data-tab="tableview">Tables</button>
+	</div>
+
+	<section id="mapview">
+		<div class="controls">
+			<label>Evacuation scenario
+				<select id="scen"><option value="20">20%</option><option value="30" selected>30%</option><option value="40">40%</option></select>
+			</label>
+			<label>Colour shelters by
+				<select id="colorby"><option value="load">load under the nearest-shelter rule</option><option value="source">source of floor area</option></select>
+			</label>
+			<label>Colour cells by
+				<select id="cellby"><option value="pop">population</option><option value="old">share aged 65+</option></select>
+			</label>
+		</div>
+		<div class="cards" id="cards"></div>
+		<div id="map"></div>
+		<p class="desc" style="margin-top:8px">Click a cell to draw its 5 candidate shelters (solid = within the 3 km walking limit, dashed = beyond it). Circle size of a shelter follows its capacity.</p>
+	</section>
+
+	<section id="cmpview" class="hidden">
+		<p class="note" id="cmpnote"></p>
+		<div class="controls">
+			<label>Evacuation scenario <select id="cscen"></select></label>
+			<label>Left map <select id="mA"></select></label>
+			<label>Right map <select id="mB"></select></label>
+			<label><input type="checkbox" id="showlines" checked> lines for cells not sent to their nearest shelter</label>
+		</div>
+		<div class="twin"><div><h3 id="tA"></h3><div id="mapA" class="cmap"></div></div><div><h3 id="tB"></h3><div id="mapB" class="cmap"></div></div></div>
+		<p class="desc" style="margin-top:8px">Both maps move together. Shelter colour = load under that method's best assignment (green up to 100%, orange to 150%, red above). Purple cells and lines = residents sent somewhere other than their nearest shelter.</p>
+		<h2>Best solution of each method</h2>
+		<div class="tablewrap"><table id="cmptbl"></table></div>
+		<h2>Convergence (best-so-far score against evaluations)</h2>
+		<p class="desc">Median of the runs with the band from the 25th to 75th percentile. Log scale. Dashed lines: the nearest and greedy rules.</p>
+		<div class="chart" id="conv"></div>
+		<h2>Every run's final score</h2>
+		<p class="desc">One dot per seed. Lower is better. Log scale.</p>
+		<div class="chart" id="strip"></div>
+	</section>
+
+	<section id="tableview" class="hidden">
+		<div class="controls">
+			<label>File <select id="file"></select></label>
+			<input type="search" id="q" placeholder="Search rows">
+		</div>
+		<p class="desc" id="fdesc"></p>
+		<details><summary>Column meanings</summary><div class="tablewrap"><table class="dict" id="dict"></table></div></details>
+		<div class="tablewrap"><table id="tbl"></table></div>
+		<div class="pager"><button id="prev">Previous</button><span id="pinfo"></span><button id="next">Next</button></div>
+		<p class="desc">The 1,403 x 246 distance matrix (distance_road_km.csv / .npz) is not shown; candidates.csv holds the part the model uses.</p>
+	</section>
+</main>
+<script>
+const D = /*__DATA__*/null;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const objs = f => { const t = D[f]; return t.rows.map(r => Object.fromEntries(t.columns.map((c, i) => [c, r[i]]))); };
+const fmt = v => v == null ? "" : (typeof v === "number" ? (Number.isInteger(v) ? v.toLocaleString("en-US") : v.toLocaleString("en-US", {maximumFractionDigits: 3})) : String(v));
+
+const cells = objs("cells.csv"), shelters = objs("shelters.csv"), cand = objs("candidates.csv");
+const gsi = objs("shelters_gsi.csv"), p20 = objs("shelters_all.csv");
+const nearest = new Array(cells.length);
+const candOf = cells.map(() => []);
+cand.forEach(c => { candOf[c.cell_id].push(c); if (c.rank === 0) nearest[c.cell_id] = c.shelter_id; });
+
+// tabs
+document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => {
+	document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b));
+	["mapview", "cmpview", "tableview"].forEach(id => document.getElementById(id).classList.toggle("hidden", id !== b.dataset.tab));
+	if (b.dataset.tab === "mapview") map.invalidateSize();
+	if (b.dataset.tab === "cmpview") cmpShow();
+});
+
+// ---------- map
+const map = L.map("map", {preferCanvas: true}).setView([37.45, 138.85], 11);
+// GSI tiles (Geospatial Information Authority of Japan) work when the page is opened as a local file;
+// OpenStreetMap's servers block requests without a website referrer.
+const gsiAttr = '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル (GSI)</a>';
+const bases = {
+	"GSI pale map": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {maxZoom: 18, attribution: gsiAttr}),
+	"GSI standard map": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {maxZoom: 18, attribution: gsiAttr}),
+	"GSI aerial photo": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {maxZoom: 18, attribution: gsiAttr}),
+};
+bases["GSI pale map"].addTo(map);
+const cellLayer = L.layerGroup().addTo(map), shelterLayer = L.layerGroup().addTo(map);
+const gsiOutLayer = L.layerGroup(), p20OldLayer = L.layerGroup(), linkLayer = L.layerGroup().addTo(map);
+L.control.layers(bases, {
+	"Census cells": cellLayer, "Shelters in the model": shelterLayer,
+	"GSI shelters left out": gsiOutLayer, "2012 sites no longer designated": p20OldLayer, "Selected cell's candidates": linkLayer,
+}, {collapsed: window.innerWidth < 700}).addTo(map);
+
+const maxPop = Math.max(...cells.map(c => c.population));
+function seq(t) { // light to dark blue
+	const a = [222, 235, 247], b = [8, 69, 148];
+	return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(",")})`;
+}
+function loadColor(r) { return r <= 1 ? css("--ok") : r <= 1.5 ? css("--warn") : css("--bad"); }
+function srcColor(s) { return s.match === "estimate" ? css("--est") : s.match === "location" ? css("--warn") : css("--accent"); }
+
+function loads(scen) {
+	const L0 = new Array(shelters.length).fill(0);
+	cells.forEach((c, i) => L0[nearest[i]] += c[`evacuees_${scen}pct`]);
+	return L0;
+}
+
+function cellPopup(c) {
+	const rows = candOf[c.cell_id].map(k => {
+		const s = shelters[k.shelter_id];
+		return `<tr><td>${k.rank}</td><td>${s.name_ja}</td><td class="num">${fmt(k.road_km)} km</td><td>${k.within_walk_limit ? "yes" : "no"}</td></tr>`;
+	}).join("");
+	return `<b>Cell ${c.cell_id}</b> (mesh ${c.mesh_key})<br>Population ${fmt(c.population)}, households ${fmt(c.households)}<br>`
+		+ `Aged 65+: ${c.pop_65plus == null ? "hidden" : fmt(c.pop_65plus)}<br>Evacuees 20/30/40%: ${fmt(c.evacuees_20pct)} / ${fmt(c.evacuees_30pct)} / ${fmt(c.evacuees_40pct)}`
+		+ `<table style="margin-top:6px"><tr><th>rank</th><th>shelter</th><th>road</th><th>&le;3 km</th></tr>${rows}</table>`;
+}
+
+function draw() {
+	const scen = +document.getElementById("scen").value, by = document.getElementById("colorby").value, cellBy = document.getElementById("cellby").value;
+	const ld = loads(scen);
+	cellLayer.clearLayers(); shelterLayer.clearLayers(); gsiOutLayer.clearLayers(); p20OldLayer.clearLayers(); linkLayer.clearLayers();
+	cells.forEach(c => {
+		let t;
+		if (cellBy === "pop") t = 0.2 + 0.8 * Math.sqrt(c.population / maxPop);
+		else t = c.pop_65plus == null || !c.population ? null : 0.2 + 0.8 * Math.min(1, c.pop_65plus / c.population / 0.6);
+		const r = L.rectangle([[c.lat - 0.00225, c.lon - 0.003125], [c.lat + 0.00225, c.lon + 0.003125]], {
+			weight: 0, fillOpacity: t == null ? 0.3 : 0.75, fillColor: t == null ? css("--grey") : seq(t),
+		}).bindPopup(() => cellPopup(c));
+		r.on("click", () => {
+			linkLayer.clearLayers();
+			candOf[c.cell_id].forEach(k => {
+				const s = shelters[k.shelter_id];
+				L.polyline([[c.lat, c.lon], [s.lat, s.lon]], {color: k.rank === 0 ? css("--bad") : css("--ink"), weight: k.rank === 0 ? 3 : 1.5, dashArray: k.within_walk_limit ? null : "4 4"}).addTo(linkLayer);
+			});
+		});
+		r.addTo(cellLayer);
+	});
+	shelters.forEach((s, j) => {
+		const ratio = ld[j] / s.capacity_3p5m2;
+		const col = by === "load" ? loadColor(ratio) : srcColor(s);
+		L.circleMarker([s.lat, s.lon], {radius: 3 + Math.sqrt(s.capacity_3p5m2) / 6, color: "#000", weight: 0.6, fillColor: col, fillOpacity: 0.9})
+			.bindPopup(`<b>${s.name_ja}</b><br>${s.address_ja}<br>Shelter ${s.shelter_id}, capacity ${fmt(s.capacity_3p5m2)} (floor ${fmt(s.floor_area_m2)} m&sup2; / 3.5)`
+				+ `<br>Official 2012 capacity: ${s.capacity_official == null ? "none" : fmt(s.capacity_official)}`
+				+ `<br>Floor area: ${s.area_source}${s.match === "location" ? ` (matched to ${s.p20_name_ja}, ${fmt(s.match_dist_m)} m away)` : ""}`
+				+ `<br><b>Nearest-rule load at ${scen}%: ${fmt(Math.round(ld[j]))} people, ${Math.round(ratio * 100)}% of capacity</b>`)
+			.addTo(shelterLayer);
+	});
+	gsi.filter(g => !g.included).forEach(g => L.circleMarker([g.lat, g.lon], {radius: 4, color: css("--grey"), weight: 1.5, fillOpacity: 0})
+		.bindPopup(`<b>${g.name_ja}</b><br>GSI shelter left out: ${g.exclusion_reason}`).addTo(gsiOutLayer));
+	const usedP20 = new Set(gsi.filter(g => g.p20_source_row >= 0).map(g => g.p20_source_row));
+	p20.filter(p => !usedP20.has(p.source_row)).forEach(p => L.circleMarker([p.lat, p.lon], {radius: 4, color: css("--old"), weight: 1.5, fillOpacity: 0})
+		.bindPopup(`<b>${p.name_ja}</b><br>2012 P20 site not in the current GSI list<br>Type: ${p.type_en}${p.exclusion_reason ? "<br>Already excluded in 2012 data: " + p.exclusion_reason : ""}<br>Floor area: ${fmt(p.floor_area_m2)} m&sup2;`).addTo(p20OldLayer));
+
+	// cards
+	const ev = cells.reduce((a, c) => a + c[`evacuees_${scen}pct`], 0);
+	const cap = shelters.reduce((a, s) => a + s.capacity_3p5m2, 0);
+	let over = 0, nOver = 0;
+	shelters.forEach((s, j) => { const o = ld[j] - s.capacity_3p5m2; if (o > 1e-9) { over += o; nOver++; } });
+	const card = (v, t) => `<div class="card"><b>${v}</b><span>${t}</span></div>`;
+	document.getElementById("cards").innerHTML = card(fmt(cells.length), "populated 500 m cells")
+		+ card(fmt(cells.reduce((a, c) => a + c.population, 0)), "residents (2020 census)")
+		+ card(fmt(shelters.length), "shelters in the model")
+		+ card(fmt(cap), "total capacity at 3.5 m²")
+		+ card(fmt(Math.round(ev)), `evacuees at ${scen}%`)
+		+ card(`${nOver} / ${shelters.length}`, "overloaded under nearest rule")
+		+ card(fmt(Math.round(over)), `people above capacity (${Math.round(over / ev * 100)}%)`);
+	legend.update(by, cellBy);
+}
+
+const legend = L.control({position: "bottomright"});
+legend.onAdd = function () { this.div = L.DomUtil.create("div", "legend"); return this.div; };
+legend.update = function (by, cellBy) {
+	const dot = (c, t, hollow) => `<div><i style="${hollow ? `border:2px solid ${c}` : `background:${c}`}"></i>${t}</div>`;
+	let h = "<b>Shelters</b>";
+	h += by === "load" ? dot(css("--ok"), "load &le; 100%") + dot(css("--warn"), "100 to 150%") + dot(css("--bad"), "over 150%")
+		: dot(css("--accent"), "P20 floor area, name match") + dot(css("--warn"), "P20 floor area, location match") + dot(css("--est"), "estimated floor area");
+	h += dot(css("--grey"), "GSI shelter left out", true) + dot(css("--old"), "2012 site no longer designated", true);
+	h += `<b>Cells</b><div><i class="sq" style="background:${seq(0.1)}"></i>${cellBy === "pop" ? "few residents" : "young"}</div><div><i class="sq" style="background:${seq(1)}"></i>${cellBy === "pop" ? "many residents" : "60%+ aged 65+"}</div>`;
+	if (cellBy === "old") h += `<div><i class="sq" style="background:${css("--grey")}"></i>hidden for privacy</div>`;
+	this.div.innerHTML = h;
+};
+legend.addTo(map);
+["scen", "colorby", "cellby"].forEach(id => document.getElementById(id).onchange = draw);
+draw();
+map.fitBounds(L.latLngBounds(cells.map(c => [c.lat, c.lon])), {padding: [10, 10]});
+
+
+// ---------- GA vs PSO
+const P = D._preview || {};
+const scens = Object.keys(P).sort();
+const COL = {"Nearest (current practice)": "--grey", "Greedy (simple heuristic)": "--ink", "GA": "--accent", "PSO": "--old"};
+let mapA = null, mapB = null, cmpReady = false;
+function cmpShow() {
+	if (!scens.length) { document.getElementById("cmpnote").textContent = "No results yet: run code/export_solutions.py, then make_index.py."; return; }
+	if (!cmpReady) cmpInit();
+	mapA.invalidateSize(); mapB.invalidateSize();
+}
+function mkMap(id) {
+	const m = L.map(id, {preferCanvas: true});
+	L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {maxZoom: 18, attribution: gsiAttr}).addTo(m);
+	m.fitBounds(L.latLngBounds(cells.map(c => [c.lat, c.lon])), {padding: [10, 10]});
+	m._layer = L.layerGroup().addTo(m);
+	return m;
+}
+function cmpInit() {
+	cmpReady = true;
+	const cs = document.getElementById("cscen");
+	scens.forEach(s => cs.add(new Option(s + "%", s)));
+	cs.value = scens.includes("30") ? "30" : scens[0];
+	const names = Object.keys(P[cs.value].methods);
+	["mA", "mB"].forEach((id, k) => { const s = document.getElementById(id); names.forEach(n => s.add(new Option(n, n))); s.value = k ? "PSO" : "GA"; });
+	mapA = mkMap("mapA"); mapB = mkMap("mapB");
+	let lock = false;
+	const sync = (a, b) => a.on("move", () => { if (lock) return; lock = true; b.setView(a.getCenter(), a.getZoom(), {animate: false}); lock = false; });
+	sync(mapA, mapB); sync(mapB, mapA);
+	["cscen", "mA", "mB", "showlines"].forEach(id => document.getElementById(id).onchange = cmpDraw);
+	cmpDraw();
+}
+function drawMethod(m, scen, name) {
+	const R = P[scen], meth = R.methods[name], a = meth.assign;
+	const ld = new Array(shelters.length).fill(0);
+	cells.forEach((c, i) => ld[a[i]] += c[`evacuees_${scen}pct`]);
+	const g = m._layer; g.clearLayers();
+	const lines = document.getElementById("showlines").checked;
+	cells.forEach((c, i) => {
+		const moved = a[i] !== nearest[i];
+		L.rectangle([[c.lat - 0.00225, c.lon - 0.003125], [c.lat + 0.00225, c.lon + 0.003125]], {
+			weight: 0, fillOpacity: moved ? 0.55 : 0.18, fillColor: moved ? css("--est") : css("--grey"),
+		}).bindPopup(`<b>Cell ${c.cell_id}</b>, ${fmt(c[`evacuees_${scen}pct`])} evacuees<br>Sent to: ${shelters[a[i]].name_ja}<br>Nearest: ${shelters[nearest[i]].name_ja}`).addTo(g);
+		if (moved && lines) {
+			const s = shelters[a[i]];
+			L.polyline([[c.lat, c.lon], [s.lat, s.lon]], {color: css("--est"), weight: 1, opacity: 0.6}).addTo(g);
+		}
+	});
+	shelters.forEach((s, j) => {
+		const r = ld[j] / s.capacity_3p5m2;
+		L.circleMarker([s.lat, s.lon], {radius: 3 + Math.sqrt(s.capacity_3p5m2) / 6, color: "#000", weight: 0.6, fillColor: loadColor(r), fillOpacity: 0.9})
+			.bindPopup(`<b>${s.name_ja}</b><br>${name}: ${fmt(Math.round(ld[j]))} people, ${Math.round(r * 100)}% of capacity ${fmt(s.capacity_3p5m2)}`).addTo(g);
+	});
+}
+function cmpDraw() {
+	const scen = document.getElementById("cscen").value, R = P[scen];
+	const nA = document.getElementById("mA").value, nB = document.getElementById("mB").value;
+	const gp = R.params ? R.params.GA : null, pp = R.params ? R.params.PSO : null;
+	document.getElementById("cmpnote").innerHTML = R.final
+		? `<b>Final experiment.</b> ${R.seeds.length} seeds per algorithm, ${R.budget.toLocaleString("en-US")} evaluations per run, tuned settings: GA population ${gp.pop_size}, mutation ${Math.round(gp.mutation_rate * cells.length * 10) / 10}/n, tournament ${gp.tournament}; PSO ${pp.topology} topology, swarm ${pp.swarm_size}, velocity limit ${pp.vmax_frac}. Maps show each method's best run.`
+		: `<b>Preview, not the final experiment.</b> GA and PSO use their default (untuned) parameters, ${R.seeds.length} seeds each, ${R.budget.toLocaleString("en-US")} evaluations per run. Maps show each method's best run. The final comparison needs 30 seeds after tuning (run_experiments.py).`;
+	document.getElementById("tA").textContent = nA; document.getElementById("tB").textContent = nB;
+	drawMethod(mapA, scen, nA); drawMethod(mapB, scen, nB);
+	cmpTable(R); convChart(R); stripChart(R);
+}
+function cmpTable(R) {
+	const names = Object.keys(R.methods);
+	const rows = [
+		["Score F (lower is better)", "F", 0], ["Walking, person-km", "walk_person_km", 0], ["Mean walk per evacuee, km", "mean_walk_km", 2],
+		["Longest walk, km", "max_walk_km", 2], ["People above capacity", "overflow_people", 0], ["Overloaded shelters", "overloaded_shelters", 0],
+		["Worst shelter load (x capacity)", "max_load_ratio", 2], ["Cells not sent to nearest", "reassigned_cells", 0],
+	];
+	let h = "<tr><th>Measure</th>" + names.map(n => `<th>${n}</th>`).join("") + "</tr>";
+	rows.forEach(([lab, k, d]) => {
+		const v = names.map(n => R.methods[n].stats[k]);
+		const lowGood = k !== "reassigned_cells";
+		const best = lowGood ? Math.min(...v) : null;
+		h += `<tr><td>${lab}</td>` + v.map(x => `<td class="num${lowGood && x === best ? " best" : ""}">${x.toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d})}</td>`).join("") + "</tr>";
+	});
+	const runs = n => R.methods[n].runs;
+	const q = (a, p) => { const s = [...a].sort((x, y) => x - y), i = (s.length - 1) * p, lo = Math.floor(i); return s[lo] + (s[Math.ceil(i)] - s[lo]) * (i - lo); };
+	h += `<tr><td>Runs: median F (IQR)</td>` + names.map(n => { if (!runs(n)) return `<td class="num">deterministic</td>`; const f = runs(n).map(r => r.F); return `<td class="num">${fmt(Math.round(q(f, .5)))} (${fmt(Math.round(q(f, .25)))} to ${fmt(Math.round(q(f, .75)))})</td>`; }).join("") + "</tr>";
+	h += `<tr><td>Runs: worst F</td>` + names.map(n => runs(n) ? `<td class="num">${fmt(Math.round(Math.max(...runs(n).map(r => r.F))))}</td>` : "<td></td>").join("") + "</tr>";
+	h += `<tr><td>Mean runtime per run, s</td>` + names.map(n => runs(n) ? `<td class="num">${(runs(n).reduce((a, r) => a + r.runtime_s, 0) / runs(n).length).toFixed(1)}</td>` : "<td></td>").join("") + "</tr>";
+	document.getElementById("cmptbl").innerHTML = h;
+}
+function logScale(lo, hi, a, b) { const l0 = Math.log10(lo), l1 = Math.log10(hi); return v => a + (Math.log10(v) - l0) / (l1 - l0) * (b - a); }
+function ticks(lo, hi) {
+	const out = [];
+	for (let e = Math.floor(Math.log10(lo)); e <= Math.ceil(Math.log10(hi)); e++) [1, 2, 5].forEach(m => { const v = m * 10 ** e; if (v >= lo && v <= hi) out.push(v); });
+	return out;
+}
+const kfmt = v => v >= 1e6 ? (v / 1e6) + "M" : v >= 1e3 ? (v / 1e3) + "k" : String(v);
+function convChart(R) {
+	const W = 860, H = 340, L0 = 64, R0 = 150, T = 12, B = 40;
+	const ga = R.methods.GA, ps = R.methods.PSO, near = R.methods["Nearest (current practice)"].stats.F, gr = R.methods["Greedy (simple heuristic)"].stats.F;
+	const all = [...ga.curve_q1, ...ps.curve_q3, near, gr];
+	const lo = Math.min(...all) * 0.9, hi = Math.max(...ga.curve_q3, ...ps.curve_q3, near) * 1.1;
+	const x = i => L0 + i / (R.grid.length - 1) * (W - L0 - R0), y = logScale(lo, hi, H - B, T);
+	let s = `<svg viewBox="0 0 ${W} ${H}">`;
+	const labels = [];
+	ticks(lo, hi).forEach(v => s += `<line x1="${L0}" x2="${W - R0}" y1="${y(v)}" y2="${y(v)}" stroke="${css("--line")}"/><text x="${L0 - 6}" y="${y(v) + 4}" text-anchor="end">${kfmt(v)}</text>`);
+	[0, 10000, 20000, 30000, 40000, 50000].forEach(e => { const i = R.grid.findIndex(g => g >= e); const xx = e === 0 ? L0 : x(i); s += `<text x="${xx}" y="${H - B + 18}" text-anchor="middle">${kfmt(e)}</text>`; });
+	s += `<text x="${(L0 + W - R0) / 2}" y="${H - 6}" text-anchor="middle">objective evaluations</text>`;
+	[["GA", ga], ["PSO", ps]].forEach(([n, m]) => {
+		const c = css(COL[n]);
+		const band = m.curve_q1.map((v, i) => `${x(i)},${y(v)}`).concat(m.curve_q3.map((v, i) => `${x(i)},${y(v)}`).reverse()).join(" ");
+		s += `<polygon points="${band}" fill="${c}" opacity="0.18"/>`;
+		s += `<polyline points="${m.curve_median.map((v, i) => `${x(i)},${y(v)}`).join(" ")}" fill="none" stroke="${c}" stroke-width="2.2"/>`;
+		const yl = y(m.curve_median[m.curve_median.length - 1]);
+		labels.push([yl, `style="fill:${c};font-weight:600"`, `${n} ${kfmt(Math.round(m.curve_median.at(-1) / 1000) * 1000)}`]);
+	});
+	[["Nearest", near, COL["Nearest (current practice)"]], ["Greedy", gr, COL["Greedy (simple heuristic)"]]].forEach(([n, v, c]) => {
+		if (v < lo || v > hi) return;
+		s += `<line x1="${L0}" x2="${W - R0}" y1="${y(v)}" y2="${y(v)}" stroke="${css(c)}" stroke-dasharray="5 4" stroke-width="1.4"/>`;
+		labels.push([y(v), "", `${n} ${kfmt(Math.round(v / 1000) * 1000)}`]);
+	});
+	labels.sort((a, b) => a[0] - b[0]);
+	for (let i = 1; i < labels.length; i++) labels[i][0] = Math.max(labels[i][0], labels[i - 1][0] + 15);
+	labels.forEach(([yy, st, tx]) => s += `<text x="${W - R0 + 8}" y="${yy + 4}" ${st}>${tx}</text>`);
+	document.getElementById("conv").innerHTML = s + "</svg>";
+}
+function stripChart(R) {
+	const W = 860, H = 170, L0 = 64, R0 = 30, T = 16;
+	const rows = [["GA", R.methods.GA.runs], ["PSO", R.methods.PSO.runs]];
+	const near = R.methods["Nearest (current practice)"].stats.F, gr = R.methods["Greedy (simple heuristic)"].stats.F;
+	const vals = rows.flatMap(r => r[1].map(x => x.F)).concat([near, gr]);
+	const lo = Math.min(...vals) * 0.85, hi = Math.max(...vals) * 1.15;
+	const x = logScale(lo, hi, L0, W - R0), yRow = k => T + 30 + k * 45;
+	let s = `<svg viewBox="0 0 ${W} ${H}">`;
+	ticks(lo, hi).forEach(v => s += `<line x1="${x(v)}" x2="${x(v)}" y1="${T}" y2="${H - 30}" stroke="${css("--line")}"/><text x="${x(v)}" y="${H - 12}" text-anchor="middle">${kfmt(v)}</text>`);
+	[["Nearest", near, COL["Nearest (current practice)"]], ["Greedy", gr, COL["Greedy (simple heuristic)"]]].forEach(([n, v, c]) => {
+		s += `<line x1="${x(v)}" x2="${x(v)}" y1="${T}" y2="${H - 30}" stroke="${css(c)}" stroke-dasharray="5 4"/><text x="${x(v) + 4}" y="${T + 6}">${n}</text>`;
+	});
+	rows.forEach(([n, runs], k) => {
+		s += `<text x="${L0 - 8}" y="${yRow(k) + 4}" text-anchor="end" style="fill:${css(COL[n])};font-weight:600">${n}</text>`;
+		runs.forEach((r, i) => s += `<circle cx="${x(r.F)}" cy="${yRow(k) + ((i % 5) - 2) * 3}" r="4.5" fill="${css(COL[n])}" opacity="0.8"><title>seed ${r.seed}: ${fmt(Math.round(r.F))}</title></circle>`);
+	});
+	document.getElementById("strip").innerHTML = s + "</svg>";
+}
+
+// ---------- tables
+const files = Object.keys(D).filter(k => !k.startsWith("_"));
+const fsel = document.getElementById("file");
+files.forEach(f => fsel.add(new Option(`${f} (${D[f].rows.length.toLocaleString("en-US")} rows)`, f)));
+let st = {f: files[0], q: "", sort: null, dir: 1, page: 0};
+const PER = 50;
+function rowsFor() {
+	let rows = D[st.f].rows;
+	if (st.q) { const q = st.q.toLowerCase(); rows = rows.filter(r => r.some(v => v != null && String(v).toLowerCase().includes(q))); }
+	if (st.sort != null) {
+		const i = st.sort;
+		rows = [...rows].sort((a, b) => a[i] == null ? 1 : b[i] == null ? -1 : (a[i] > b[i] ? 1 : a[i] < b[i] ? -1 : 0) * st.dir);
+	}
+	return rows;
+}
+function renderTable() {
+	const t = D[st.f], rows = rowsFor(), pages = Math.max(1, Math.ceil(rows.length / PER));
+	st.page = Math.min(st.page, pages - 1);
+	document.getElementById("fdesc").textContent = t.desc;
+	const head = "<tr>" + t.columns.map((c, i) => `<th data-i="${i}">${c}${st.sort === i ? (st.dir > 0 ? " ▲" : " ▼") : ""}</th>`).join("") + "</tr>";
+	const body = rows.slice(st.page * PER, (st.page + 1) * PER).map(r => "<tr>" + r.map(v => `<td class="${typeof v === "number" ? "num" : ""}">${fmt(v)}</td>`).join("") + "</tr>").join("");
+	const tbl = document.getElementById("tbl");
+	tbl.innerHTML = head + body;
+	tbl.querySelectorAll("th").forEach(th => th.onclick = () => { const i = +th.dataset.i; st.dir = st.sort === i ? -st.dir : 1; st.sort = i; renderTable(); });
+	document.getElementById("pinfo").textContent = `${rows.length.toLocaleString("en-US")} rows, page ${st.page + 1} of ${pages}`;
+	const base = st.f.split("/").pop();
+	const dict = D._dict.filter(r => r[0] === base || (base.startsWith("distance") && r[0].startsWith("distance")));
+	document.getElementById("dict").innerHTML = dict.length ? "<tr><th>column</th><th>type</th><th>meaning</th></tr>" + dict.map(r => `<tr><td>${r[1]}</td><td>${r[2] ?? ""}</td><td>${r[3]}</td></tr>`).join("")
+		: "<tr><td>Not in data_dictionary.csv; see the file description above.</td></tr>";
+}
+fsel.onchange = () => { st = {f: fsel.value, q: "", sort: null, dir: 1, page: 0}; document.getElementById("q").value = ""; renderTable(); };
+document.getElementById("q").oninput = e => { st.q = e.target.value; st.page = 0; renderTable(); };
+document.getElementById("prev").onclick = () => { st.page = Math.max(0, st.page - 1); renderTable(); };
+document.getElementById("next").onclick = () => { st.page++; renderTable(); };
+renderTable();
+</script>
+</body>
+</html>

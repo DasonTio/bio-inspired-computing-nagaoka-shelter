@@ -7,41 +7,30 @@ evaluation budget is enforced.
 import numpy as np
 import pandas as pd
 
-ROAD_FACTOR = 1.3        # straight-line km -> approximate road km
-M2_PER_PERSON = 3.5      # Nagaoka shelter operations manual (FY2026)
-FLOOD_ONLY = "信濃川等のはんらん時避難場所"
+import os
 
-
-def haversine_km(lat1, lon1, lat2, lon2):
-    p = np.pi / 180
-    a = (np.sin((lat2 - lat1) * p / 2) ** 2
-         + np.cos(lat1 * p) * np.cos(lat2 * p) * np.sin((lon2 - lon1) * p / 2) ** 2)
-    return 12742 * np.arcsin(np.sqrt(a))
-
-
-def load_shelters(path):
-    s = pd.read_csv(path)
-    s["area_m2"] = pd.to_numeric(s["P20_006"], errors="coerce")
-    s["cap_official"] = pd.to_numeric(s["P20_005"], errors="coerce")
-    s = s[(s["P20_004"] != FLOOD_ONLY) & (s["area_m2"] > 0)].reset_index(drop=True)
-    s["cap"] = np.floor(s["area_m2"] / M2_PER_PERSON).astype(int)
-    return s
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "dataset")
 
 
 class Problem:
-    def __init__(self, cells_csv, shelters_csv, evac_rate=0.3, k=5,
-                 max_walk_km=3.0, penalty=10.0, capacity="area", objective="convex"):
+    """Reads the files built by dataset/build_dataset.py: cells.csv (demand),
+    shelters.csv (current GSI shelters with P20 floor areas), distance_road_km.npz.
+    Road factor, m2 per person and the shelter selection live in the dataset build."""
+
+    def __init__(self, evac_rate=0.3, k=5, max_walk_km=3.0, penalty=10.0,
+                 capacity="area", objective="convex", data_dir=DATA_DIR):
         self.objective = objective      # "convex" (main model) or "linear" (exact-solver reference)
-        c = pd.read_csv(cells_csv)
-        c = c[c["pop"] > 0].reset_index(drop=True)
-        s = load_shelters(shelters_csv)
+        c = pd.read_csv(os.path.join(data_dir, "cells.csv"))
+        s = pd.read_csv(os.path.join(data_dir, "shelters.csv"))
         self.cells, self.shelters = c, s
         self.evac_rate, self.k, self.max_walk_km, self.penalty = evac_rate, k, max_walk_km, penalty
 
-        self.demand = c["pop"].to_numpy(float) * evac_rate                    # e_i
-        self.cap = (s["cap"] if capacity == "area" else s["cap_official"]).to_numpy(float)  # C_j
-        D = haversine_km(c.lat.to_numpy()[:, None], c.lon.to_numpy()[:, None],
-                         s.lat.to_numpy()[None], s.lon.to_numpy()[None]) * ROAD_FACTOR
+        self.demand = c["population"].to_numpy(float) * evac_rate              # e_i
+        if capacity == "area":
+            self.cap = s["capacity_3p5m2"].to_numpy(float)                       # C_j
+        else:   # official 2012 capacity; shelters without one keep the 3.5 m2 value
+            self.cap = s["capacity_official"].fillna(s["capacity_3p5m2"]).to_numpy(float)
+        D = np.load(os.path.join(data_dir, "distance_road_km.npz"))["distance_road_km"].astype(float)
         order = np.argsort(D, axis=1)[:, :k]                                   # k nearest
         dist = np.take_along_axis(D, order, axis=1)
         # walking limit: a candidate beyond the limit is replaced by the nearest one,

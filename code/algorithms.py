@@ -58,8 +58,14 @@ def genetic_algorithm(p, budget, seed, pop_size=50, tournament=3,
 
 
 def particle_swarm(p, budget, seed, swarm_size=50, w=0.729, c1=1.49445, c2=1.49445,
-                   vmax_frac=0.5):
-    """Continuous global-best PSO; positions in [0, n_valid_i) decoded by floor()."""
+                   vmax_frac=0.5, topology="global"):
+    """Continuous PSO; positions in [0, n_valid_i) decoded by floor().
+
+    topology="global": every particle follows the best of the whole swarm (gbest).
+    topology="ring":   every particle follows the best of itself and its two
+                       neighbours in a fixed ring (lbest, Kennedy and Mendes 2002),
+                       which spreads information slowly and keeps the swarm diverse.
+    """
     rng = np.random.default_rng(seed)
     lo, hi = np.zeros(p.n), p.n_valid.astype(float) - 1e-9
     vmax = vmax_frac * (hi - lo)
@@ -73,8 +79,13 @@ def particle_swarm(p, budget, seed, swarm_size=50, w=0.729, c1=1.49445, c2=1.494
         for s in range(swarm_size):
             if t.left() <= 0:
                 break
+            if topology == "ring":
+                nb = [(s - 1) % swarm_size, s, (s + 1) % swarm_size]
+                guide = pbest[nb[int(np.argmin(pbest_f[nb]))]]
+            else:
+                guide = g
             r1, r2 = rng.random(p.n), rng.random(p.n)
-            vel[s] = w * vel[s] + c1 * r1 * (pbest[s] - pos[s]) + c2 * r2 * (g - pos[s])
+            vel[s] = w * vel[s] + c1 * r1 * (pbest[s] - pos[s]) + c2 * r2 * (guide - pos[s])
             vel[s] = np.clip(vel[s], -vmax, vmax)
             pos[s] = np.clip(pos[s] + vel[s], lo, hi)
             f = t.eval(p.decode_continuous(pos[s]))

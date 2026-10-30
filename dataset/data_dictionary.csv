@@ -11,17 +11,18 @@ cells.csv,merged_into / merged_from,str,mesh keys involved in the privacy merge
 cells.csv,age_detail_scope,str,"own_cell, includes_merged_cells or hidden"
 cells.csv,nearest_facility_km,float,straight-line km to the nearest Niigata evacuation facility (used to assign cells to Nagaoka)
 cells.csv,evacuees_20pct / 30pct / 40pct,float,demand e_i = population x evacuation rate
-shelters.csv,shelter_id,int,0-based id used by the model (246 usable shelters)
-shelters.csv,source_row,int,row in shelters_all.csv
-shelters.csv,name_ja / address_ja,str,"facility name and address (P20_002, P20_003)"
-shelters.csv,type_ja / type_en,str,facility type (P20_004)
-shelters.csv,lat / lon,float,"location, decimal degrees"
-shelters.csv,floor_area_m2,float,floor area m2 (P20_006); empty if unknown
-shelters.csv,capacity_official,float,official capacity in 2012 (P20_005); empty if unknown
+shelters.csv,shelter_id,int,0-based id used by the model (general shelters from the current GSI list with a P20 floor area)
+shelters.csv,gsi_id,str,GSI common id (共通ID) of the designated shelter
+shelters.csv,name_ja / address_ja,str,facility name and address from GSI (current)
+shelters.csv,lat / lon,float,"GSI location, decimal degrees"
+shelters.csv,floor_area_m2,float,"floor area m2 from the matched P20 site (P20_006, 2012)"
+shelters.csv,capacity_official,float,official 2012 capacity of the matched P20 site (P20_005); empty if unknown
 shelters.csv,capacity_3p5m2,int,capacity used by the model = floor(floor_area_m2 / 3.5)
-shelters.csv,official_m2_per_person,float,floor_area_m2 / capacity_official (0.57-2.0 in the data)
-shelters.csv,flag_earthquake ... flag_none,0/1,hazard designations P20_007-P20_012; earthquake is 0 for every Nagaoka site
-shelters.csv,location_level,int,geocoding accuracy level from the source (1 = most precise; 3 and 4 are coarser)
+shelters.csv,match / match_dist_m,str / float,"how the floor area was found: name or location (within 100 m) match to P20, or estimate; distance between the matched points"
+shelters.csv,area_source,str,"P20 2012, or the basis of the estimate (manual/floor_area_estimates.csv, with sources)"
+shelters.csv,p20_source_row / p20_name_ja,int / str,matched row and name in shelters_all.csv
+shelters_gsi.csv,all columns,,"all 285 GSI designated shelters with match, included and exclusion_reason (audit)"
+shelters_all.csv,floor_area_m2 ... location_level,,"P20 2012 sites: floor area, official capacity, hazard flags, geocoding level"
 shelters_all.csv,included / exclusion_reason,bool / str,all 281 Nagaoka sites with the reason a site was dropped
 candidates.csv,"cell_id, rank, shelter_id",int,"the 5 nearest shelters of each cell, rank 0 = nearest (the decision options)"
 candidates.csv,road_km,float,straight-line km x 1.3

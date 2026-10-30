@@ -1,0 +1,141 @@
+alg,setting,seed,F,runtime_s
+GA,"pop_size=100, mutation_rate=1.0/n",1000,109091.31447384182,2.69
+GA,"pop_size=100, mutation_rate=1.0/n",1001,108709.43041140288,2.66
+GA,"pop_size=100, mutation_rate=1.0/n",1002,108827.379497979,2.65
+GA,"pop_size=100, mutation_rate=1.0/n",1003,112636.88238242271,2.62
+GA,"pop_size=100, mutation_rate=1.0/n",1004,113594.96721147036,2.63
+GA,"pop_size=100, mutation_rate=1.0/n",1005,111816.91761520662,2.65
+GA,"pop_size=100, mutation_rate=1.0/n",1006,110952.28282919472,2.62
+GA,"pop_size=100, mutation_rate=1.0/n",1007,107756.56448025462,2.6
+GA,"pop_size=100, mutation_rate=1.0/n",1008,113590.9265239424,2.62
+GA,"pop_size=100, mutation_rate=1.0/n",1009,116297.54441873064,2.62
+GA,"pop_size=100, mutation_rate=1.0/n",1010,107577.7349679638,2.61
+GA,"pop_size=100, mutation_rate=1.0/n",1011,115225.67172325712,2.62
+GA,"pop_size=100, mutation_rate=1.0/n",1012,110535.15107695055,2.66
+GA,"pop_size=100, mutation_rate=1.0/n",1013,113712.4155184682,2.6
+GA,"pop_size=100, mutation_rate=1.0/n",1014,112078.86548526069,2.56
+GA,"pop_size=100, mutation_rate=1.0/n",1015,111401.17683931271,2.54
+GA,"pop_size=100, mutation_rate=1.0/n",1016,111733.5853738436,2.56
+GA,"pop_size=100, mutation_rate=1.0/n",1017,111833.29986769974,2.57
+GA,"pop_size=100, mutation_rate=1.0/n",1018,111828.1217499836,2.55
+GA,"pop_size=100, mutation_rate=1.0/n",1019,110316.72223287373,2.54
+GA,"pop_size=30, mutation_rate=2.0/n",1000,106131.2279589765,2.59
+GA,"pop_size=30, mutation_rate=2.0/n",1001,111498.13207856944,2.58
+GA,"pop_size=30, mutation_rate=2.0/n",1002,109664.48678193025,2.58
+GA,"pop_size=30, mutation_rate=2.0/n",1003,109749.07101373536,2.59
+GA,"pop_size=30, mutation_rate=2.0/n",1004,115799.10344031746,2.59
+GA,"pop_size=30, mutation_rate=2.0/n",1005,105175.21746215854,2.64
+GA,"pop_size=30, mutation_rate=2.0/n",1006,109588.04111085946,2.64
+GA,"pop_size=30, mutation_rate=2.0/n",1007,107427.80619186648,2.61
+GA,"pop_size=30, mutation_rate=2.0/n",1008,113081.0810632859,2.63
+GA,"pop_size=30, mutation_rate=2.0/n",1009,104455.96046057087,2.63
+GA,"pop_size=30, mutation_rate=2.0/n",1010,108411.61905528008,2.63
+GA,"pop_size=30, mutation_rate=2.0/n",1011,108598.90865757148,2.63
+GA,"pop_size=30, mutation_rate=2.0/n",1012,109276.3730443534,2.63
+GA,"pop_size=30, mutation_rate=2.0/n",1013,111955.6434861003,2.64
+GA,"pop_size=30, mutation_rate=2.0/n",1014,106288.23271634856,2.59
+GA,"pop_size=30, mutation_rate=2.0/n",1015,111123.30612064368,2.63
+GA,"pop_size=30, mutation_rate=2.0/n",1016,111389.91063276982,2.63
+GA,"pop_size=30, mutation_rate=2.0/n",1017,109355.6124391742,2.6
+GA,"pop_size=30, mutation_rate=2.0/n",1018,106782.31332195638,2.58
+GA,"pop_size=30, mutation_rate=2.0/n",1019,110298.3223948044,2.6
+GA,"pop_size=50, mutation_rate=2.0/n",1000,109617.78122072408,2.59
+GA,"pop_size=50, mutation_rate=2.0/n",1001,113482.17184394343,2.57
+GA,"pop_size=50, mutation_rate=2.0/n",1002,110847.41543583693,2.58
+GA,"pop_size=50, mutation_rate=2.0/n",1003,115900.54996613268,2.57
+GA,"pop_size=50, mutation_rate=2.0/n",1004,110900.31710475526,2.57
+GA,"pop_size=50, mutation_rate=2.0/n",1005,109215.89020037284,2.58
+GA,"pop_size=50, mutation_rate=2.0/n",1006,113120.80216115624,2.56
+GA,"pop_size=50, mutation_rate=2.0/n",1007,110969.15276369968,2.56
+GA,"pop_size=50, mutation_rate=2.0/n",1008,111553.67856100916,2.56
+GA,"pop_size=50, mutation_rate=2.0/n",1009,109926.86025735203,2.56
+GA,"pop_size=50, mutation_rate=2.0/n",1010,108888.43753549473,2.56
+GA,"pop_size=50, mutation_rate=2.0/n",1011,110901.82411533353,2.55
+GA,"pop_size=50, mutation_rate=2.0/n",1012,107163.13596516672,2.57
+GA,"pop_size=50, mutation_rate=2.0/n",1013,113324.92713543416,2.56
+GA,"pop_size=50, mutation_rate=2.0/n",1014,113121.25513364232,2.54
+GA,"pop_size=50, mutation_rate=2.0/n",1015,110899.07440895816,2.57
+GA,"pop_size=50, mutation_rate=2.0/n",1016,110262.82601434644,2.58
+GA,"pop_size=50, mutation_rate=2.0/n",1017,110237.91954780206,2.57
+GA,"pop_size=50, mutation_rate=2.0/n",1018,110790.60596735028,2.54
+GA,"pop_size=50, mutation_rate=2.0/n",1019,107861.59793266242,2.56
+GA,"pop_size=50, mutation_rate=5.0/n",1000,112199.8089304005,2.59
+GA,"pop_size=50, mutation_rate=5.0/n",1001,110355.99162195832,2.59
+GA,"pop_size=50, mutation_rate=5.0/n",1002,110962.4172456446,2.57
+GA,"pop_size=50, mutation_rate=5.0/n",1003,112733.85970606229,2.56
+GA,"pop_size=50, mutation_rate=5.0/n",1004,107605.75550593148,2.58
+GA,"pop_size=50, mutation_rate=5.0/n",1005,109253.09479238132,2.58
+GA,"pop_size=50, mutation_rate=5.0/n",1006,115686.67829495369,2.56
+GA,"pop_size=50, mutation_rate=5.0/n",1007,113175.31356190602,2.58
+GA,"pop_size=50, mutation_rate=5.0/n",1008,112008.65263359594,2.59
+GA,"pop_size=50, mutation_rate=5.0/n",1009,115465.15634519326,2.61
+GA,"pop_size=50, mutation_rate=5.0/n",1010,112289.1014470367,2.59
+GA,"pop_size=50, mutation_rate=5.0/n",1011,109711.18304916228,2.61
+GA,"pop_size=50, mutation_rate=5.0/n",1012,111964.04958405912,2.6
+GA,"pop_size=50, mutation_rate=5.0/n",1013,112764.99980551508,2.57
+GA,"pop_size=50, mutation_rate=5.0/n",1014,110662.34252987904,2.59
+GA,"pop_size=50, mutation_rate=5.0/n",1015,112699.95858552823,2.57
+GA,"pop_size=50, mutation_rate=5.0/n",1016,110101.31541226812,2.58
+GA,"pop_size=50, mutation_rate=5.0/n",1017,114011.7110244204,2.58
+GA,"pop_size=50, mutation_rate=5.0/n",1018,110841.94125366549,2.58
+GA,"pop_size=50, mutation_rate=5.0/n",1019,109750.19617583364,2.58
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1000,213975.5033172428,2.54
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1001,192055.38739455567,2.5
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1002,207793.6798470167,2.48
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1003,193129.3002475496,2.51
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1004,226040.62674059125,2.49
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1005,301892.1625438486,2.48
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1006,207592.44311597355,2.48
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1007,256874.8898703907,2.49
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1008,308999.610554666,2.48
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1009,282293.5689009696,2.46
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1010,227894.78021922804,2.5
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1011,271885.293228886,2.48
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1012,217862.70055244552,2.46
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1013,192216.06290017185,2.44
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1014,219612.5730599412,2.48
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1015,185543.80095835964,2.46
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1016,230686.36467690323,2.47
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1017,227625.4463216138,2.45
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1018,256003.7861826214,2.45
+PSO,"swarm_size=20, vmax_frac=0.2, topology=ring",1019,253244.24259675216,2.46
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1000,244558.08441616132,2.47
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1001,207693.7863696551,2.48
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1002,220257.82447599564,2.47
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1003,213434.35170398524,2.47
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1004,222674.8511226212,2.49
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1005,257229.39315414184,2.46
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1006,226882.82396448991,2.46
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1007,253863.51644298717,2.47
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1008,205820.0354833777,2.47
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1009,236169.7772277647,2.46
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1010,218735.42405132216,2.47
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1011,245844.6614797706,2.47
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1012,240763.88018036247,2.47
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1013,248321.1422198938,2.46
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1014,254475.2941092374,2.47
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1015,212594.78253491607,2.51
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1016,223872.1266980493,2.57
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1017,227324.3196337371,2.54
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1018,207726.64574998064,2.59
+PSO,"swarm_size=50, vmax_frac=0.2, topology=ring",1019,239873.89037280995,2.6
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1000,209110.59785060087,2.53
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1001,239307.67734842637,2.58
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1002,236583.41489216773,2.53
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1003,196052.6455225118,2.52
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1004,263629.5406995921,2.54
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1005,225859.55797960542,2.54
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1006,224777.5171625073,2.52
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1007,308782.2566027666,2.5
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1008,215931.29009334766,2.47
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1009,210615.66006111205,2.51
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1010,223743.94079492323,2.52
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1011,279011.53538348293,2.48
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1012,211729.59378514532,2.48
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1013,178380.56939860346,2.53
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1014,244753.80998926295,2.5
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1015,237563.53843229267,2.49
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1016,253902.68357667423,2.53
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1017,258303.0984394187,2.5
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1018,238445.71283040865,2.5
+PSO,"swarm_size=20, vmax_frac=0.1, topology=ring",1019,209725.1196883308,2.52
