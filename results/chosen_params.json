@@ -1,0 +1,18 @@
+{
+ "_note": "GA and PSO chosen on 20 tuning seeds (1000-1019), 30% scenario, 50,000 evaluations: see tuning_confirm.csv (first screening: tuning_ga.csv, tuning_pso.csv)",
+ "GA": {
+  "pop_size": 30,
+  "mutation_rate": 0.0014255167498218105,
+  "tournament": 3,
+  "crossover_rate": 0.9,
+  "elite": 2
+ },
+ "PSO": {
+  "swarm_size": 20,
+  "vmax_frac": 0.2,
+  "w": 0.729,
+  "c1": 1.49445,
+  "c2": 1.49445,
+  "topology": "ring"
+ }
+}

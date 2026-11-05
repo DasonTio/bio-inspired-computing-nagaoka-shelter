@@ -2,7 +2,7 @@
 import itertools, json, numpy as np
 from shelter_model import Problem
 from algorithms import genetic_algorithm, particle_swarm
-p = Problem("nagaoka_cells_2020.csv", "nagaoka_shelters_raw.csv", evac_rate=0.3)
+p = Problem(evac_rate=0.3)
 B, seeds = 50000, range(1000, 1005)
 rows = []
 for pop, pm_mult in itertools.product([30, 50, 100], [1, 2, 5]):

@@ -1,0 +1,4 @@
+scenario,mannwhitney_p,A12_GA_better,GA_vs_nearest,GA_vs_greedy,GA_runs_beating_greedy
+20%,3.019859359162157e-11,1.0,90.0% lower,-1.3% lower,13%
+30%,3.019859359162157e-11,1.0,91.2% lower,4.6% lower,100%
+40%,3.019859359162157e-11,1.0,88.9% lower,7.4% lower,100%

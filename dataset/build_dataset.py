@@ -3,8 +3,9 @@
 Inputs  (raw/, unchanged downloads):
     P20-12_15_GML.zip          MLIT evacuation facilities, Niigata, 2012 (shapefile, Shift-JIS)
     tblT001101S5538/5539/5638/5639.zip   e-Stat 2020 census, 500 m mesh, table T001101 (Shift-JIS)
+    15202_1.zip, 15202_2.zip   GSI designated shelters / emergency evacuation sites, Nagaoka (UTF-8)
 Outputs (in this folder):
-    cells.csv, shelters.csv, shelters_all.csv, candidates.csv,
+    cells.csv, shelters.csv, shelters_gsi.csv, shelters_all.csv, candidates.csv,
     distance_road_km.npz, distance_road_km.csv, census_mesh_nagaoka_full.csv,
     scenarios.json, data_dictionary.csv
 
@@ -12,6 +13,7 @@ Run:  python build_dataset.py        (needs numpy, pandas, pyshp)
 """
 import csv, io, json, os, sys, zipfile
 import numpy as np, pandas as pd, shapefile
+import gsi_shelters
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(HERE, "raw")
@@ -109,10 +111,16 @@ shel["included"] = reason == ""
 shel["exclusion_reason"] = reason
 shel.insert(0, "source_row", range(len(shel)))
 shel.to_csv("shelters_all.csv", index=False)
-use = shel[shel.included].copy().reset_index(drop=True)
+# the model uses the current GSI shelter list; P20 only supplies floor areas (see gsi_shelters.py)
+USE_ESTIMATES = True                # False: drop the GSI shelters whose floor area is only estimated
+est = pd.read_csv(os.path.join(HERE, "manual", "floor_area_estimates.csv")) if USE_ESTIMATES else None
+gsi, gsi_hazards, n_emergency = gsi_shelters.build(RAW, shel, M2_PER_PERSON, est)
+gsi.to_csv("shelters_gsi.csv", index=False)
+use = gsi[gsi.included].copy().reset_index(drop=True)
 use.insert(0, "shelter_id", range(len(use)))
 use["capacity_3p5m2"] = use["capacity_3p5m2"].astype(int)
-use = use.drop(columns=["included", "exclusion_reason"])
+use = use[["shelter_id", "gsi_id", "name_ja", "address_ja", "lat", "lon", "floor_area_m2", "capacity_official",
+           "capacity_3p5m2", "match", "match_dist_m", "area_source", "p20_source_row", "p20_name_ja"]]
 use.to_csv("shelters.csv", index=False)
 
 # ------------------------------------------------------------------ cells table (model input)
@@ -165,17 +173,18 @@ dd = [
  ("cells.csv", "age_detail_scope", "str", "own_cell, includes_merged_cells or hidden"),
  ("cells.csv", "nearest_facility_km", "float", "straight-line km to the nearest Niigata evacuation facility (used to assign cells to Nagaoka)"),
  ("cells.csv", "evacuees_20pct / 30pct / 40pct", "float", "demand e_i = population x evacuation rate"),
- ("shelters.csv", "shelter_id", "int", "0-based id used by the model (246 usable shelters)"),
- ("shelters.csv", "source_row", "int", "row in shelters_all.csv"),
- ("shelters.csv", "name_ja / address_ja", "str", "facility name and address (P20_002, P20_003)"),
- ("shelters.csv", "type_ja / type_en", "str", "facility type (P20_004)"),
- ("shelters.csv", "lat / lon", "float", "location, decimal degrees"),
- ("shelters.csv", "floor_area_m2", "float", "floor area m2 (P20_006); empty if unknown"),
- ("shelters.csv", "capacity_official", "float", "official capacity in 2012 (P20_005); empty if unknown"),
+ ("shelters.csv", "shelter_id", "int", "0-based id used by the model (general shelters from the current GSI list with a P20 floor area)"),
+ ("shelters.csv", "gsi_id", "str", "GSI common id (共通ID) of the designated shelter"),
+ ("shelters.csv", "name_ja / address_ja", "str", "facility name and address from GSI (current)"),
+ ("shelters.csv", "lat / lon", "float", "GSI location, decimal degrees"),
+ ("shelters.csv", "floor_area_m2", "float", "floor area m2 from the matched P20 site (P20_006, 2012)"),
+ ("shelters.csv", "capacity_official", "float", "official 2012 capacity of the matched P20 site (P20_005); empty if unknown"),
  ("shelters.csv", "capacity_3p5m2", "int", "capacity used by the model = floor(floor_area_m2 / 3.5)"),
- ("shelters.csv", "official_m2_per_person", "float", "floor_area_m2 / capacity_official (0.57-2.0 in the data)"),
- ("shelters.csv", "flag_earthquake ... flag_none", "0/1", "hazard designations P20_007-P20_012; earthquake is 0 for every Nagaoka site"),
- ("shelters.csv", "location_level", "int", "geocoding accuracy level from the source (1 = most precise; 3 and 4 are coarser)"),
+ ("shelters.csv", "match / match_dist_m", "str / float", "how the floor area was found: name or location (within 100 m) match to P20, or estimate; distance between the matched points"),
+ ("shelters.csv", "area_source", "str", "P20 2012, or the basis of the estimate (manual/floor_area_estimates.csv, with sources)"),
+ ("shelters.csv", "p20_source_row / p20_name_ja", "int / str", "matched row and name in shelters_all.csv"),
+ ("shelters_gsi.csv", "all columns", "", "all 285 GSI designated shelters with match, included and exclusion_reason (audit)"),
+ ("shelters_all.csv", "floor_area_m2 ... location_level", "", "P20 2012 sites: floor area, official capacity, hazard flags, geocoding level"),
  ("shelters_all.csv", "included / exclusion_reason", "bool / str", "all 281 Nagaoka sites with the reason a site was dropped"),
  ("candidates.csv", "cell_id, rank, shelter_id", "int", "the 5 nearest shelters of each cell, rank 0 = nearest (the decision options)"),
  ("candidates.csv", "road_km", "float", "straight-line km x 1.3"),
@@ -186,6 +195,9 @@ dd = [
 pd.DataFrame(dd, columns=["file", "column", "type", "meaning"]).to_csv("data_dictionary.csv", index=False)
 
 print(f"census mesh rows {len(mesh)} | Nagaoka cells {len(ng)} (populated {len(cells)}, people {int(cells.population.sum())})")
-print(f"shelters: {len(shel)} Nagaoka sites, {len(use)} usable, capacity {int(use.capacity_3p5m2.sum())} people")
-print("exclusions:", shel.exclusion_reason.replace('', 'kept').value_counts().to_dict())
+print(f"P20 (2012): {len(shel)} Nagaoka sites, {int(shel.included.sum())} with floor area")
+print(f"GSI shelters: {len(gsi)} listed, {len(use)} used, capacity {int(use.capacity_3p5m2.sum())} people")
+print("GSI matches:", gsi.match.value_counts().to_dict())
+print("GSI exclusions:", gsi.exclusion_reason.replace('', 'kept').value_counts().to_dict())
+print(f"GSI emergency sites: {n_emergency}, by hazard:", gsi_hazards)
 print("candidates within 3 km per cell (mean):", round(pd.DataFrame(cand).within_walk_limit.mean() * K, 2))

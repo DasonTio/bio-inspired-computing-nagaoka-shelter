@@ -5,7 +5,7 @@ from shelter_model import Problem
 
 def test_hand_calculation():
     for obj in ["linear", "convex"]:
-        p = Problem("nagaoka_cells_2020.csv", "nagaoka_shelters_raw.csv", evac_rate=0.3, objective=obj)
+        p = Problem(evac_rate=0.3, objective=obj)
         x = np.zeros(p.n, dtype=int)
         j = p.cand[:, 0]
         load = np.zeros(p.m)
@@ -21,13 +21,13 @@ def test_hand_calculation():
 
 
 def test_random_solutions_are_valid():
-    p = Problem("nagaoka_cells_2020.csv", "nagaoka_shelters_raw.csv")
+    p = Problem()
     x = p.random_solution(np.random.default_rng(0))
     assert (x >= 0).all() and (x < p.n_valid).all()
 
 
 def test_decoding_and_bounds():
-    p = Problem("nagaoka_cells_2020.csv", "nagaoka_shelters_raw.csv")
+    p = Problem()
     z = np.full(p.n, 9.0)                          # far above any bound
     x = p.decode_continuous(z)
     assert (x == p.n_valid - 1).all()              # clipped to the last *valid* candidate
@@ -39,9 +39,9 @@ def test_decoding_and_bounds():
 
 
 def test_totals_match_census():
-    p = Problem("nagaoka_cells_2020.csv", "nagaoka_shelters_raw.csv", evac_rate=1.0)
+    p = Problem(evac_rate=1.0)
     assert abs(p.demand.sum() - 266975) < 1       # official 2020 census: 266,936
-    assert p.m == 246
+    assert p.m == 223                             # current GSI shelters with a floor area (9 estimated)
 
 
 if __name__ == "__main__":
