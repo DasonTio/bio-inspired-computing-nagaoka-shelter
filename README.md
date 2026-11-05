@@ -2,7 +2,7 @@
 
 Status: **experiments finished**. Data (GSI 2026 shelter list), model, baselines, tuning, the 30-run
 GA/PSO experiments, statistics, sensitivity checks and figures are done.
-Not done yet: the written report, one-page proposal and AI disclosure table.
+The report (with the one-page proposal, Google Maps route checks and stakeholder statements) is written; see validation/ for the field evidence files.
 
 ## The problem
 After a large earthquake, assign the evacuees of each populated 500 m cell in Nagaoka to one
@@ -42,7 +42,7 @@ Outputs: `cells.csv` (1,403 cells, 266,975 people), `shelters.csv` (223 shelters
    (`capacity_official`) for a sensitivity scenario.
 5. Privacy-merged census cells still report total population; the 65+ breakdown is hidden for 232 cells (not used).
 6. Cells assigned to Nagaoka by nearest facility: total 266,975 vs official 2020 census 266,936 (difference 0.015%).
-7. Shelter size is barely related to nearby population (Spearman 0.17), so urban shelters overflow and rural ones stay empty.
+7. Shelter size is barely related to nearby population (Spearman 0.15), so urban shelters overflow and rural ones stay empty.
 
 ## Method
 - **Baselines:** nearest shelter (current practice), greedy, and an exact MILP (HiGHS) for the linear-penalty
